@@ -81,7 +81,7 @@ Citizen.CreateThread(function ()
 
 			Wait(5000)
 			--sends message to police
-			TriggerServerEvent('esx_phone:send', 'police', _U('police_message') .. location, true, {}, true)
+			TriggerServerEvent('esx_phone:send', 'police', _U('police_message'), true, {}, true)
 		 end
         end
       end
