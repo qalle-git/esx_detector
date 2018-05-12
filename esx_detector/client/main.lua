@@ -77,7 +77,7 @@ Citizen.CreateThread(function ()
 			--sends message to client
 			sendNotification(_U('busted'), 'error', 5000)
 			--makes sound to everyone around him
-			TriggerServerEvent("InteractSound_SV:PlayWithinDistance", 55, "detector", 1.0)
+			TriggerServerEvent("InteractSound_SV:PlayWithinDistance", 25, "detector", 1.0)
 
 			Wait(5000)
 			--sends message to police
