@@ -37,7 +37,6 @@ Config.Zones = {
 
 Config.Weapons = {
   { name = 'WEAPON_KNIFE', label = _U('weapon_knife') },
-  { name = 'WEAPON_NIGHTSTICK', label = _U('weapon_nightstick') },
   { name = 'WEAPON_HAMMER', label = _U('weapon_hammer') },
   { name = 'WEAPON_BAT', label = _U('weapon_bat') },
   { name = 'WEAPON_GOLFCLUB', label = _U('weapon_golfclub') },
@@ -112,6 +111,4 @@ Config.Weapons = {
   { name = 'WEAPON_POOLCUE', label = _U('weapon_poolcue') },
   { name = 'WEAPON_WRENCH', label = _U('weapon_wrench') },
   { name = 'WEAPON_FLASHLIGHT', label = _U('weapon_flashlight') },
-  { name = 'GADGET_NIGHTVISION', label = _U('gadget_nightvision') },
-  { name = 'GADGET_PARACHUTE', label = _U('gadget_parachute') },
 }
