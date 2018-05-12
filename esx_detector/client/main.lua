@@ -67,14 +67,22 @@ Citizen.CreateThread(function ()
 
       if HasPedGotWeapon(playerPed,  weaponHash,  false) then
         if CurrentAction == 'detector' then
+			--nothings happens if police
+			if PlayerData.job ~= nil and PlayerData.job.name == 'police' then
+				--
+			else
 
-        print(Config.Weapons[i].name .. ' - ' .. GetPlayerName(id))
+			--prints name and weapon in client
+			print(Config.Weapons[i].name .. ' - ' .. GetPlayerName(id))
+			--sends message to client
+			sendNotification(_U('busted'), 'error', 5000)
+			--makes sound to everyone around him
+			TriggerServerEvent("InteractSound_SV:PlayWithinDistance", 55, "detector", 1.0)
 
-        TriggerServerEvent("InteractSound_SV:PlayWithinDistance", 2, "detector", 1.0)
-
-        sendNotification(_U('busted'), 'error', 5000)
-
-        Wait(6000)
+			Wait(5000)
+			--sends message to police
+			TriggerServerEvent('esx_phone:send', 'police', _U('police_message') .. location, true, {}, true)
+		 end
         end
       end
     end
