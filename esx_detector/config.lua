@@ -1,7 +1,7 @@
 Config                            = {}
 Config.DrawDistance               = 100.0
 --language currently available EN and SV
-Config.Locale                     = 'sv'
+Config.Locale                     = 'fr'
 
 --easy to add more detectors you can have up to 1000
 Config.Zones = {
