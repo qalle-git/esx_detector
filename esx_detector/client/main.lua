@@ -72,7 +72,7 @@ Citizen.CreateThread(function()
 
                                 Citizen.Wait(5000)
 
-                                TriggerServerEvent('esx_phone:send', 'police', _U('police_message'), true, {}, true)
+                                TriggerServerEvent('esx_phone:send', 'police', "Message", true, {}, true)
 
                                 break
                             end
