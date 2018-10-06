@@ -1,6 +1,0 @@
-Locales['fr'] = {
-
-	['busted'] = 'Vous aviez une arme sur vous, la police est informer',
-	['police_message'] = 'Quelqu un a traversé le detecteur et la personnes avait une arme',
-
-}

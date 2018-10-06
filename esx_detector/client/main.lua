@@ -9,150 +9,85 @@ local Keys = {
   ["LEFT"] = 174, ["RIGHT"] = 175, ["TOP"] = 27, ["DOWN"] = 173,
 }
 
-
---- action functions
-local CurrentAction           = nil
-local CurrentActionMsg        = ''
-local CurrentActionData       = {}
-local HasAlreadyEnteredMarker = false
-local LastZone                = nil
-
-
---- esx
-local GUI = {}
 ESX                           = nil
-GUI.Time                      = 0
-local PlayerData              = {}
 
-Citizen.CreateThread(function ()
-  while ESX == nil do
-    TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-    Citizen.Wait(0)
- 	PlayerData = ESX.GetPlayerData()
-  end
+PlayerData              = {}
+
+Citizen.CreateThread(function()
+    while ESX == nil do
+
+        TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+
+        Citizen.Wait(10)
+    end
+
+    while ESX.GetPlayerData() == nil do
+        Citizen.Wait(10)
+    end
 end)
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
-  PlayerData = xPlayer
+    PlayerData = xPlayer
 end)
 
 RegisterNetEvent('esx:setJob')
 AddEventHandler('esx:setJob', function(job)
-  PlayerData.job = job
+    PlayerData.job = job
 end)
 
-----markers
-AddEventHandler('esx_detector:hasEnteredMarker', function (zone)
-  if zone ~= nil then
-    CurrentAction     = 'detector'
-    CurrentActionMsg  = _U('press_e')
-    CurrentActionData = {}
-  end
-end)
+Citizen.CreateThread(function()
+    while true do
 
-AddEventHandler('esx_detector:hasExitedMarker', function (zone)
-  CurrentAction = nil
-end)
+        local sleepThread = 500
 
+        local ped = PlayerPedId()
+        local pedCoords = GetEntityCoords(ped)
 
---keycontrols
-Citizen.CreateThread(function ()
-  while true do
-    Citizen.Wait(0)
-    for i=1, #Config.Weapons, 1 do
+        if PlayerData.job ~= nil and PlayerData.job.name ~= "police" then
 
-      local playerPed = GetPlayerPed(-1)
-      local weaponHash = GetHashKey(Config.Weapons[i].name)
+            for detector, v in pairs(Config.Detectors) do
 
-      if HasPedGotWeapon(playerPed,  weaponHash,  false) then
-        if CurrentAction == 'detector' then
-			--nothings happens if police
-			if PlayerData.job ~= nil and PlayerData.job.name == 'police' then
-				--
-			else
+                local distanceCheck = GetDistanceBetweenCoords(pedCoords, v.x, v.y, v.z, true)
 
-			--prints name and weapon in client
-			print(Config.Weapons[i].name .. ' - ' .. GetPlayerName(id))
-			--sends message to client
-			sendNotification(_U('busted'), 'error', 5000)
-			--makes sound to everyone around him
-			TriggerServerEvent("InteractSound_SV:PlayWithinDistance", 25, "detector", 1.0)
+                if distanceCheck <= 10.0 then
 
-			Wait(5000)
-			--sends message to police
-			TriggerServerEvent('esx_phone:send', 'police', _U('police_message'), true, {}, true)
-		 end
+                    sleepThread = 5
+
+                    ESX.Game.Utils.DrawText3D({ x = v.x, y = v.y, z = v.z }, "Detector", 0.4)
+
+                    if distanceCheck <= 1.5 then
+
+                        local Weapons = ESX.GetWeaponList()
+
+                        for i, values in pairs(Weapons) do
+
+                            print(GetHashKey(values.name))
+
+                            if HasPedGotWeapon(ped, GetHashKey(values["name"]), false) then
+                        
+                                ESX.ShowNotification("You had weapons on you and the alarm went off.")
+
+                                TriggerServerEvent("InteractSound_SV:PlayWithinDistance", 25, "detector", 1.0)
+
+                                Citizen.Wait(5000)
+
+                                TriggerServerEvent('esx_phone:send', 'police', _U('police_message'), true, {}, true)
+
+                                break
+                            end
+                        end
+
+                    end
+
+                end
+
+            end
+        else
+            sleepThread = 1500
         end
-      end
+
+        Citizen.Wait(sleepThread)
+
     end
-  end
 end)
-
--- Display markers
-Citizen.CreateThread(function ()
-  while true do
-    Wait(0)
-
-    local coords = GetEntityCoords(GetPlayerPed(-1))
-
-    for k,v in pairs(Config.Zones) do
-      if(v.Type ~= -1 and GetDistanceBetweenCoords(coords, v.Pos.x, v.Pos.y, v.Pos.z, true) < Config.DrawDistance) then
-        DrawMarker(v.Type, v.Pos.x, v.Pos.y, v.Pos.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, v.Size.x, v.Size.y, v.Size.z, v.Color.r, v.Color.g, v.Color.b, 100, false, true, 2, false, false, false, false)
-      end
-    end
-  end
-end)
-
--- Enter / Exit marker events
-Citizen.CreateThread(function ()
-  while true do
-    Wait(0)
-
-    local coords      = GetEntityCoords(GetPlayerPed(-1))
-    local isInMarker  = false
-    local currentZone = nil
-
-    for k,v in pairs(Config.Zones) do
-      if(GetDistanceBetweenCoords(coords, v.Pos.x, v.Pos.y, v.Pos.z, true) < v.Size.x) then
-        isInMarker  = true
-        currentZone = k
-      end
-    end
-
-    if (isInMarker and not HasAlreadyEnteredMarker) or (isInMarker and LastZone ~= currentZone) then
-      HasAlreadyEnteredMarker = true
-      LastZone                = currentZone
-      TriggerEvent('esx_detector:hasEnteredMarker', currentZone)
-    end
-
-    if not isInMarker and HasAlreadyEnteredMarker then
-      HasAlreadyEnteredMarker = false
-      TriggerEvent('esx_detector:hasExitedMarker', LastZone)
-    end
-  end
-end)
-
----- FUNCTIONS ----
-function Notify(text)
-	SetNotificationTextEntry('STRING')
-	AddTextComponentString(text)
-	DrawNotification(false, false)
-end
-
-function DisplayHelpText(str)
-	SetTextComponentFormat("STRING")
-	AddTextComponentString(str)
-	DisplayHelpTextFromStringLabel(0, 0, 1, -1)
-end
-
---notification
-function sendNotification(message, messageType, messageTimeout)
-	TriggerEvent("pNotify:SendNotification", {
-		text = message,
-		type = messageType,
-		queue = "katalog",
-		timeout = messageTimeout,
-		layout = "bottomCenter"
-	})
-end
