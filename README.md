@@ -3,9 +3,6 @@
 [REQUIREMENTS]
   
   * ESX Support
-  * es_extended
-  * essentialmode
-  * pNotify
 
 [INSTALLATION]
 
